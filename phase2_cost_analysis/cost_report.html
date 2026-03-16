@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Cost-Sensitive Fraud Detection -- Report</title>
+<style>
+  body      { font-family: Arial, sans-serif; max-width: 980px; margin: 40px auto; color: #222; line-height: 1.65; }
+  h1        { color: #1a237e; border-bottom: 3px solid #1a237e; padding-bottom: 8px; }
+  h2        { color: #283593; margin-top: 44px; }
+  .meta     { color: #666; font-size: 0.9em; margin-bottom: 28px; }
+  .box-warn { background: #fff8e1; border-left: 5px solid #f9a825; padding: 14px 20px; margin: 20px 0; border-radius: 4px; }
+  .box-good { background: #e8f5e9; border-left: 5px solid #2e7d32; padding: 14px 20px; margin: 20px 0; border-radius: 4px; font-size: 1.05em; }
+  .box-info { background: #e3f2fd; border-left: 5px solid #1565c0; padding: 14px 20px; margin: 20px 0; border-radius: 4px; }
+  .box-risk { background: #fce4ec; border-left: 5px solid #c62828; padding: 14px 20px; margin: 20px 0; border-radius: 4px; }
+  table     { border-collapse: collapse; width: 100%; font-size: 0.83em; margin: 14px 0; }
+  th        { background: #1a237e; color: #fff; padding: 9px 10px; text-align: right; white-space: nowrap; }
+  th:first-child, th:nth-child(2) { text-align: left; }
+  td        { padding: 7px 10px; border-bottom: 1px solid #ddd; text-align: right; }
+  td:first-child, td:nth-child(2) { text-align: left; }
+  tr:hover  { background: #f5f5f5; }
+  small     { color: #888; }
+</style>
+</head>
+<body>
+
+<h1>Cost-Sensitive Fraud Detection Analysis</h1>
+<div class="meta">
+  Generated: March 16, 2026 &nbsp;|&nbsp;
+  Dataset: European Credit Card Transactions (2013, anonymized) &nbsp;|&nbsp;
+  Models: Logistic Regression &nbsp;&nbsp; Random Forest &nbsp;&nbsp; XGBoost
+</div>
+
+<div class="box-warn">
+  <strong>Assumption Disclosure -- please read before interpreting figures</strong><br>
+  These are <strong>illustrative cost estimates</strong> for a portfolio analysis conducted on
+  an anonymized dataset. The dollar values below are not representative of any specific bank,
+  card scheme, or geography. Real investigation and fraud recovery costs vary significantly by
+  institution, transaction type, and contractual arrangements.
+  <ul>
+    <li>Base FP cost (investigation):  <strong>$10</strong> per flagged transaction &nbsp;<small>(industry estimate: $7-10)</small></li>
+    <li>Friction penalty:              <strong>1%</strong> of Amount added to FP cost &nbsp;<small>(larger blocked txns create more friction)</small></li>
+    <li>Full FP cost:                  <strong>$10 + (0.01 x Amount)</strong></li>
+    <li>FN cost:                       <strong>full transaction Amount</strong> &nbsp;<small>(worst-case -- no partial recovery assumed)</small></li>
+  </ul>
+</div>
+
+<h2>Key Findings</h2>
+<div class="box-good">
+  <strong>Best model:</strong> Random Forest at cost-optimal threshold <strong>0.30</strong><br>
+  <strong>Test set total cost:</strong> $4,389.00
+  &nbsp;|&nbsp; FP cost: $152.92
+  &nbsp;|&nbsp; FN cost: $4,236.08<br>
+  <strong>Recall:</strong> 0.8514
+  &nbsp;|&nbsp; <strong>F1:</strong> 0.8344
+  &nbsp;|&nbsp; <strong>ROC-AUC:</strong> 0.9635<br>
+  <strong>Estimated annual cost at 1M transactions:</strong> $102,734
+</div>
+
+<h2>Model Comparison -- Test Set</h2>
+<p><small> = champion (lowest cost). Green rows = cost-optimal threshold results.</small></p>
+<table>
+  <tr>
+    <th>Model</th><th>Threshold Type</th><th>Threshold</th>
+    <th>Total Cost</th><th>FP Cost</th><th>FN Cost</th>
+    <th>n FP</th><th>n FN</th>
+    <th>Precision</th><th>Recall</th><th>F1</th><th>ROC-AUC</th>
+    <th>Est. Annual (1M txn)</th>
+  </tr>
+  <tr style="background:#e8f5e9;"><td>Logistic Regression</td><td>Cost-Optimal</td><td>0.99</td><td>$4,562</td><td>$326</td><td>$4,236</td><td>30</td><td>12</td><td>0.674</td><td>0.838</td><td>0.747</td><td>0.9646</td><td>$106,787</td></tr>
+<tr><td>Logistic Regression</td><td>0.5 Default</td><td>0.50</td><td>$14,103</td><td>$10,779</td><td>$3,325</td><td>980</td><td>9</td><td>0.062</td><td>0.878</td><td>0.116</td><td>0.9646</td><td>$330,122</td></tr>
+<tr style="background:#e8f5e9;"><td>Random Forest </td><td>Cost-Optimal</td><td>0.30</td><td>$4,389</td><td>$153</td><td>$4,236</td><td>14</td><td>11</td><td>0.818</td><td>0.851</td><td>0.834</td><td>0.9635</td><td>$102,734</td></tr>
+<tr><td>Random Forest</td><td>0.5 Default</td><td>0.50</td><td>$4,899</td><td>$91</td><td>$4,808</td><td>9</td><td>15</td><td>0.868</td><td>0.797</td><td>0.831</td><td>0.9635</td><td>$114,672</td></tr>
+<tr style="background:#e8f5e9;"><td>XGBoost</td><td>Cost-Optimal</td><td>0.75</td><td>$5,396</td><td>$908</td><td>$4,488</td><td>84</td><td>14</td><td>0.417</td><td>0.811</td><td>0.550</td><td>0.9722</td><td>$126,314</td></tr>
+<tr><td>XGBoost</td><td>0.5 Default</td><td>0.50</td><td>$6,164</td><td>$1,677</td><td>$4,487</td><td>155</td><td>13</td><td>0.282</td><td>0.824</td><td>0.421</td><td>0.9722</td><td>$144,285</td></tr>
+</table>
+
+<h2>Operational Interpretation</h2>
+<div class="box-info">
+  At a cost-optimal threshold of <strong>0.30</strong>,
+  for every <strong>10,000 transactions</strong> this model flags approximately
+  <strong>18</strong> as fraud, of which approximately
+  <strong>15</strong> are genuine fraud and
+  <strong>3</strong> are false alarms.
+  The estimated investigation and friction cost of false alarms is
+  <strong>$36</strong>, offset against approximately
+  <strong>$992</strong> in fraud prevented,
+  for a net saving of approximately <strong>$958</strong>
+  compared to no fraud detection.
+</div>
+
+<h2>Cost-Optimal vs F1-Optimal Threshold</h2>
+<p>
+  For <strong>Random Forest</strong>, the F1-optimal threshold is
+  <strong>0.69</strong> and the cost-optimal threshold is
+  <strong>0.30</strong>.
+  Choosing the F1-optimal threshold instead of the cost-optimal threshold
+  would increase total business cost by approximately
+  <strong>$2,165.51</strong> on the validation set.
+</p>
+<p>
+  The F1 metric treats false positives and false negatives symmetrically --
+  it has no awareness of the dollar asymmetry between a $10 investigation cost
+  and a $500 fraud loss. The cost-optimal threshold internalises that asymmetry
+  directly. A business with reliable estimates of investigation and fraud loss
+  costs should use the cost-optimal threshold. F1-optimal is appropriate when
+  costs are unknown or a balanced trade-off is preferred on principle.
+</p>
+
+<h2>Sensitivity Analysis -- Investigation Cost Scenarios</h2>
+<p>
+  How does the optimal threshold change as investigation costs rise?
+  Higher FP costs make false alarms more expensive, pushing the optimal
+  threshold <em>up</em> (flag fewer transactions, tolerate more missed fraud).
+</p>
+<table>
+  <tr>
+    <th style="text-align:left">Scenario</th>
+    <th>FP Base Cost</th>
+    <th>Optimal Threshold</th>
+    <th>Total Cost (validation)</th>
+  </tr>
+  <tr><td>Low ($5)</td><td>$5</td><td>0.30</td><td>$2,406.07</td></tr>
+<tr><td>Base ($10)</td><td>$10</td><td>0.30</td><td>$2,506.07</td></tr>
+<tr><td>High ($25)</td><td>$25</td><td>0.50</td><td>$2,696.94</td></tr>
+<tr><td>Very High ($50)</td><td>$50</td><td>0.50</td><td>$2,896.94</td></tr>
+</table>
+
+<h2>Limitations</h2>
+<div class="box-risk">
+<ul>
+  <li><strong>Anonymized dataset:</strong> V1-V28 are PCA-transformed and cannot be interpreted
+      as business features. Transaction amounts may not reflect real currency values.</li>
+  <li><strong>Investigation cost is an estimate:</strong> $10 base cost is an industry
+      estimate, not specific to any bank, card scheme, or internal workflow.</li>
+  <li><strong>Concept drift:</strong> This dataset is from 2013. Fraud patterns evolve;
+      model performance may degrade on future data without periodic retraining.</li>
+  <li><strong>SMOTE generates synthetic samples:</strong> Oversampled minority examples are
+      interpolated, not real transactions. Models may be partially fit to a synthetic
+      distribution rather than real fraud patterns.</li>
+  <li><strong>Random split, not time-ordered:</strong> Production models should be trained
+      on past data and evaluated on future data to avoid temporal leakage.</li>
+  <li><strong>Worst-case FN assumption:</strong> We assume 100% of the fraud amount is lost.
+      In practice, chargebacks, insurance, or partial recovery reduce actual loss.</li>
+</ul>
+</div>
+
+</body>
+</html>

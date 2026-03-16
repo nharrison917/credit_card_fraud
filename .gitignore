@@ -1,0 +1,21 @@
+# Data — 144MB CSV, exceeds GitHub's 50MB limit. Source: Kaggle (see README)
+data/
+
+# Virtual environment
+.venv/
+
+# Saved model binaries — large, binary, reproducible by running the scripts
+# model_metadata.json is NOT ignored (small, human-readable, useful reference)
+models/*.pkl
+
+# Claude tooling
+.claude/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# OS noise
+.DS_Store
+Thumbs.db
