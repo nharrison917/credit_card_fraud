@@ -393,6 +393,65 @@ print(f"""
 """)
 
 # ============================================================
+# DASHBOARD DATA EXPORT -> models/dashboard_data.json
+# Powers the Streamlit dashboard (app.py).
+# Contains validation sweep data (per-threshold FP/FN counts and costs)
+# and test set results at default + cost-optimal thresholds.
+# The friction component stored implicitly in fp_cost allows the dashboard
+# to recompute costs for any FP base cost without re-running models:
+#   friction_part = fp_cost - BASE_FP_COST * n_fp
+#   new_fp_cost   = new_base * n_fp + friction_part
+# ============================================================
+print("\n  Exporting dashboard data...")
+
+dashboard_val_sweep = {}
+for model_name, df in sweep_store.items():
+    int_cols = {'n_fp', 'n_fn'}
+    dashboard_val_sweep[model_name] = {
+        col: [int(v) if col in int_cols else round(float(v), 6)
+              for v in df[col]]
+        for col in df.columns
+    }
+
+dashboard_test_results = {}
+for _, row in test_df.iterrows():
+    m     = row['model']
+    ttype = 'cost_optimal' if row['threshold_type'] == 'Cost-Optimal' else 'default_0_50'
+    if m not in dashboard_test_results:
+        dashboard_test_results[m] = {}
+    dashboard_test_results[m][ttype] = {
+        'threshold':  float(row['threshold']),
+        'total_cost': round(float(row['total_cost']), 4),
+        'fp_cost':    round(float(row['fp_cost']), 4),
+        'fn_cost':    round(float(row['fn_cost']), 4),
+        'n_fp':       int(row['n_fp']),
+        'n_fn':       int(row['n_fn']),
+        'recall':     round(float(row['recall']), 6),
+        'precision':  round(float(row['precision']), 6),
+        'f1':         round(float(row['f1']), 6),
+        'auc':        round(float(row['auc']), 6),
+    }
+
+dashboard_data = {
+    'metadata': {
+        'base_fp_cost':           10,
+        'friction_rate':          0.01,
+        'n_val':                  int(len(y_val)),
+        'n_fraud_val':            int(y_val.sum()),
+        'total_fraud_amount_val': round(float(amounts_val[y_val == 1].sum()), 4),
+        'n_test':                 int(len(y_test)),
+        'n_fraud_test':           int(y_test.sum()),
+    },
+    'validation_sweep': dashboard_val_sweep,
+    'test_results':     dashboard_test_results,
+}
+
+dashboard_path = os.path.join(MODELS_DIR, 'dashboard_data.json')
+with open(dashboard_path, 'w', encoding='utf-8') as f:
+    json.dump(dashboard_data, f, indent=2)
+print("  Saved -> models/dashboard_data.json")
+
+# ============================================================
 # VISUALIZATIONS -> phase2_cost_analysis/cost_results.html
 # ============================================================
 print("[9/9] Building visualisations...")
