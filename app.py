@@ -193,9 +193,9 @@ st.divider()
 # ============================================================
 st.header("Threshold Explorer")
 st.markdown(
-    "Watch how total cost, FP cost (investigation + friction), and FN cost (missed fraud) "
-    "respond to threshold changes -- and notice how the curves cross differently for each model. "
-    "Use the **Controls** panel to select a model and threshold."
+    "Use this chart to confirm the cost-optimal threshold for the selected model. "
+    "The recommended configuration, highlighted in the table below, was chosen because it minimizes total financial exposure. "
+    "Select a model and threshold in the **Controls** panel to compare scenarios."
 )
 
 t_arr, total_c, fp_c, fn_c, n_fp_arr, n_fn_arr, recall_arr = sweep_arrays(selected_model)
@@ -313,8 +313,9 @@ st.divider()
 # ============================================================
 st.header("Sensitivity Analysis")
 st.markdown(
-    "How sensitive is the recommendation to the assumed investigation cost per false positive? "
-    "Adjust **FP Investigation Base Cost** in the Controls panel to explore."
+    "A key concern before deploying any model is whether the recommendation depends heavily on cost assumptions we cannot verify precisely. "
+    "It doesn't. Random Forest remains the preferred choice regardless of investigation cost. "
+    "Adjust **FP Investigation Base Cost** in the Controls panel to confirm."
 )
 
 s_cols = st.columns(3)
@@ -348,9 +349,9 @@ fig_s.update_layout(
 )
 st.plotly_chart(fig_s, width='stretch')
 st.caption(
-    "RF remains the lowest-cost model across the full $1-$100 range. "
-    "The optimal threshold shifts from 0.30 to 0.50 only when investigation costs "
-    "exceed ~$25, confirming the framework is robust to reasonable assumption variation."
+    "Random Forest delivers the lowest total cost across the full $1-$100 investigation cost range. "
+    "The recommendation is robust: the optimal threshold shifts only when investigation costs exceed approximately $25, "
+    "well outside the range of realistic operational assumptions."
 )
 st.divider()
 

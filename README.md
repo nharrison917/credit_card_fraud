@@ -43,11 +43,11 @@ An interactive Streamlit dashboard surfaces the Phase 2 business findings for a 
 
 ![Dashboard overview — header, bottom line, and threshold explorer](assets/dashboard_overview.png)
 
-**Threshold Explorer** — drag the threshold and watch total cost, FP cost, and FN cost update live. The crossover point where investigation costs outweigh missed-fraud losses is visible directly on the chart.
+**Threshold Explorer** — confirms the cost-optimal threshold for any model, showing exactly where investigation costs outweigh missed-fraud losses. The recommended configuration minimizes total financial exposure; drag the threshold to compare alternatives directly.
 
 ![Model comparison table](assets/dashboard_model_comparison.png)
 
-**Sensitivity Analysis** — adjust the assumed investigation cost per false positive ($1–$100) to test how robust the recommendation is. RF remains the lowest-cost model across the full range; the optimal threshold shifts by only 0.20 even as investigation cost quadruples.
+**Sensitivity Analysis** — the recommendation holds across the full $1–$100 investigation cost range. Random Forest remains the lowest-cost model regardless of assumption; the optimal threshold shifts by only 0.20 even as investigation cost quadruples. Adjust the assumption in the Controls panel to confirm.
 
 ![Sensitivity analysis and operational reality](assets/dashboard_sensitivity.png)
 
@@ -98,6 +98,8 @@ but flags too many legitimate transactions, collapsing F1 to 0.51.
 ## Phase 2 — Cost-Sensitive Decision Framework
 
 ### Cost Model
+
+The framework translates model outputs into a business decision: given a predicted probability of fraud, what classification threshold minimizes total cost to the business? Each error type carries a specific cost, and the optimal threshold is the point where those costs are balanced.
 
 > **All figures are illustrative.** The dataset currency is unknown and amounts
 > are anonymized. Cost calculations should be interpreted as relative comparisons,
